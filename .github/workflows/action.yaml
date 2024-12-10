@@ -1,0 +1,22 @@
+name: Action workflow
+run-name: Action - ${{ input.environment }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        required: true
+        description: "Deployment environment"
+        options:
+          - dev
+          - test
+          - uat
+          - prod
+
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    steps: 
+      - run: |
+          echo "Environment deploying to ${{ inputs.environment }}"

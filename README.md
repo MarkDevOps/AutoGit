@@ -9,6 +9,7 @@ Another attempt at a Github automation script
 
 ### TODO: 
 - Display environment name - Iterate over the environments deployed. 
+- Add conditions to add ARGS for specific output.
 ### NOTES 
 - Fetches latest release from repo and displays name and release URL
 - Fetches workflows with status, name and url. If release name/tag matches
