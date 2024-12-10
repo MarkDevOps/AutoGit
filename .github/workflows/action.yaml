@@ -17,6 +17,7 @@ on:
 jobs:
   job:
     runs-on: ubuntu-latest
-    steps: 
+    environment: ${{ inputs.environment }} 
+    steps:
       - run: |
           echo "Environment deploying to ${{ inputs.environment }}"
