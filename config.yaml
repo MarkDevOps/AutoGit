@@ -1,0 +1,7 @@
+org: MarkDevOpsOrg
+repos:
+  TestRepo:
+    - dev
+    - test
+    - uat
+    - prod
