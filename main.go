@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// config file mapping.
 type Config struct {
 	Org   string              `yaml:"org"`
 	Repos map[string][]string `yaml:"repos"`
@@ -19,6 +20,8 @@ type Release struct {
 	Name    string `json:"name"`
 	HTMLURL string `json:"html_url"`
 }
+
+// workflow responses
 type Workflow struct {
 	ID         int    `json:"id"`
 	Name       string `json:"name"`
@@ -30,11 +33,14 @@ type Workflow struct {
 		ID string `json:"id"`
 	} `json:"head_commit"`
 }
+
+// fetch workflowAction responses
 type WorkflowRepsonse struct {
 	TotalCount int        `json:"total_count"`
 	Workflows  []Workflow `json:"workflow_runs"`
 }
 
+// environment responses
 type Environment struct {
 	Name             string `json:"name"`
 	HTMLURL          string `json:"html_url"`
@@ -45,6 +51,65 @@ type Environment struct {
 		State     string `json:"state"`
 		CreatedAt string `json:"created_at"`
 	} `json:"latest_deployment"`
+}
+
+type Deployment struct {
+	ID          int    `json:"id"`
+	Ref         string `json:"ref"`
+	Environment string `json:"environment"`
+	Description string `json:"description"`
+	CreatedAt   string `json:"created_at"`
+	StatusesURL string `json:"statuses_url"`
+}
+
+type DeploymentStatus struct {
+	ID        int    `json:"id"`
+	State     string `json:"state"`
+	CreatedAt string `json:"created_at"`
+}
+
+// fetchDeployments fetches deployments for a given repositories
+func fetchDeployments(org, repo string) ([]Deployment, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/deployments", org, repo)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch deployments for %s/%s: %w", org, repo, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("non-200 response for %s/%s deployments: %s", org, repo, resp.Status)
+	}
+
+	var deployments []Deployment
+	if err := json.NewDecoder(resp.Body).Decode(&deployments); err != nil {
+		return nil, fmt.Errorf("failed to decode deployments for %s/%s: %w", org, repo, err)
+	}
+
+	return deployments, nil
+}
+
+// fetchLatestDeploymentStatus fetches the latest status for a given deployment
+func fetchLatestDeploymentStatus(statusesURL string) (*DeploymentStatus, error) {
+	resp, err := http.Get(statusesURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch deployment statuses: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("non-200 response for deployment statuses: %s", resp.Status)
+	}
+
+	var statuses []DeploymentStatus
+	if err := json.NewDecoder(resp.Body).Decode(&statuses); err != nil {
+		return nil, fmt.Errorf("failed to decode deployment statuses: %w", err)
+	}
+
+	if len(statuses) > 0 {
+		return &statuses[0], nil // Return the most recent status
+	}
+	return nil, nil
 }
 
 // fetchEnvironments fetches all environments for a given repository
@@ -153,67 +218,53 @@ func main() {
 	// Display organization name
 	fmt.Printf("Organization: %s\n\n", config.Org)
 
-	// Add condition to enable this output.
-	for repo, _ := range config.Repos {
-		fmt.Printf("Fetchign deployment environments for repo: %s/%s\n", config.Org, repo)
+	// Iterate over repos and fetch deployments
+	for repo, environments := range config.Repos {
+		fmt.Printf("Fetching deployments for repo: %s/%s\n", config.Org, repo)
 
-		environments, err := fetchEnvironments(config.Org, repo)
+		deployments, err := fetchDeployments(config.Org, repo)
 		if err != nil {
-			fmt.Printf("Error fetching environments for repo %s: %v\n", repo, err)
+			fmt.Printf("Error fetching deployments for repo %s: %v\n", repo, err)
 			continue
 		}
 
-		// Display environments and their latest deployments
+		// Map deployments to environments
 		for _, env := range environments {
-			fmt.Printf("Environment: %s\n", env.Name)
-			fmt.Printf("  - URL: %s\n", env.HTMLURL)
-			fmt.Printf("  - Created At: %s\n", env.CreatedAt)
-			fmt.Printf("  - Updated At: %s\n", env.UpdatedAt)
-			if env.LatestDeployment.ID > 0 {
-				fmt.Printf("  - Latest Deployment ID: %d\n", env.LatestDeployment.ID)
-				fmt.Printf("  - State: %s\n", env.LatestDeployment.State)
-				fmt.Printf("  - Created At: %s\n", env.LatestDeployment.CreatedAt)
+			fmt.Printf("Environment: %s\n", env)
+			var latestDeployment *Deployment
+			for _, dep := range deployments {
+				if dep.Environment == env {
+					if latestDeployment == nil || dep.CreatedAt > latestDeployment.CreatedAt {
+						latestDeployment = &dep
+					}
+				}
+			}
+
+			if latestDeployment != nil {
+				fmt.Printf("  - Deployment ID: %d\n", latestDeployment.ID)
+				fmt.Printf("  - Ref: %s\n", latestDeployment.Ref)
+
+				// Fetch latest deployment status
+				status, err := fetchLatestDeploymentStatus(latestDeployment.StatusesURL)
+				if err != nil {
+					fmt.Printf("  Error fetching deployment status: %v\n", err)
+				} else if status != nil {
+					fmt.Printf("  - Status: %s\n", status.State)
+					fmt.Printf("  - Created At: %s\n", latestDeployment.CreatedAt)
+					fmt.Printf("  - Status Created At: %s\n", status.CreatedAt)
+				} else {
+					fmt.Printf("  - Created At: %s\n", latestDeployment.CreatedAt)
+					fmt.Printf("  - No statuses found for this deployment\n")
+				}
+				if latestDeployment.Description == "" {
+					fmt.Println("  - Description: NOT_SET")
+				} else {
+					fmt.Printf("  - Description: %s\n", latestDeployment.Description)
+				}
 			} else {
 				fmt.Printf("  - No deployments found for this environment\n")
 			}
 		}
+		fmt.Println()
 	}
-
-	// Iterate over repos and their environments
-	// for repo, environments := range config.Repos { // Removed until a use for environments is needed.
-	// 	// for repo := range config.Repos {
-	// 	fmt.Printf("Fetching latest release for repo: %s/%s\n", config.Org, repo)
-
-	// 	release, err := fetchLatestRelease(config.Org, repo)
-	// 	if err != nil {
-	// 		fmt.Printf("Error fetching release for repo: %s, %v\n", repo, err)
-	// 		continue
-	// 	}
-	// 	fmt.Printf("  - Latest Release: %s\n", release.TagName)
-	// 	fmt.Printf("  - Release Name: %s\n", release.Name)
-	// 	fmt.Printf("  - Release URL: %s\n", release.HTMLURL)
-
-	// 	// fetch and display workflows linked to the release
-	// 	workflows, err := fetchWorkflowRuns(config.Org, repo, release.TagName)
-	// 	if err != nil {
-	// 		fmt.Printf("  Error fetching workflows for repo %s: %v\n", repo, err)
-	// 	} else {
-	// 		fmt.Printf("  - Linked Workflows:\n")
-	// 		for _, wf := range workflows {
-	// 			fmt.Printf("      - Name:		%s\n", wf.Name)
-	// 			fmt.Printf("      - Status:		%s\n", wf.Status)
-	// 			fmt.Printf("      - Conclusion: 	%s\n", wf.Conclusion)
-	// 			fmt.Printf("      - Workflow URL: 	%s\n", wf.HTMLURL)
-	// 		}
-	// 	}
-
-	// 	// Display results for each environments
-	// 	for _, env := range environments {
-	// 		fmt.Printf("Environment: %s\n", env)
-	// 		fmt.Printf("  - Latest Release: %s\n", release.TagName)
-	// 		fmt.Printf("  - Release Name: %s\n", release.Name)
-	// 		fmt.Printf("  - Release URL: %s\n", release.HTMLURL)
-	// 	}
-	// 	fmt.Println()
-	// }
 }

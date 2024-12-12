@@ -1,17 +1,17 @@
 # AutoGit
 Another attempt at a Github automation script 
 
+### TODO: 
 - use github api to automate simple/complext tasks 
 - use mongodb for local storage `mongod --dbpath ~/mongodb-data`
-[x] Pass YAML file through for config
-- Ensure approval can be achieved
--
+- [x] Pass YAML file through for config
+- [x] Outputs latest Deployment environment information
+- [] Test multiple repos
+- [] Add output to YAML file.
+- [] Add Background colour to the status line
+- [] Trigger deployments
+- [] Approval of deployments
+- [] Add conditions to add ARGS for specific output.
 
-### TODO: 
-- Display environment name - Iterate over the environments deployed. 
-- Add conditions to add ARGS for specific output.
 ### NOTES 
-- Fetches latest release from repo and displays name and release URL
-- Fetches workflows with status, name and url. If release name/tag matches
-    - Helps display the workflows that have deployed that tag
--
+

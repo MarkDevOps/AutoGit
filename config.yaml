@@ -1,6 +1,6 @@
-org: MarkDevOpsOrg
+org: MarkDevOps
 repos:
-  TestRepo:
+  AutoGit:
     - dev
     - test
     - uat
