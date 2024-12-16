@@ -15,6 +15,10 @@ type Config struct {
 	Org   string              `yaml:"org"`
 	Repos map[string][]string `yaml:"repos"`
 }
+type OutputData struct {
+	Organization string                        `yaml:"organization"`
+	Repositories map[string]map[string]EnvData `yaml:"repositories"`
+}
 type Release struct {
 	TagName string `json:"tag_name"`
 	Name    string `json:"name"`
@@ -51,6 +55,16 @@ type Environment struct {
 		State     string `json:"state"`
 		CreatedAt string `json:"created_at"`
 	} `json:"latest_deployment"`
+}
+
+type EnvData struct {
+	DeploymentID  int    `yaml:"deployment_id,omitempty"`
+	Ref           string `yaml:"ref,omitempty"`
+	Description   string `yaml:"description,omitempty"`
+	CreatedAt     string `yaml:"created_at,omitempty"`
+	Status        string `yaml:"status,omitempty"`
+	StatusTime    string `yaml:"status_time,omitempty"`
+	DeploymentURL string `yaml:"deployment_url,omitempty"`
 }
 
 type Deployment struct {
@@ -201,6 +215,7 @@ func main() {
 	}
 
 	configFilePath := os.Args[1]
+	outputFilePath := "output.yaml"
 
 	// Load and parse the Yaml config file
 	yamlFile, err := os.ReadFile(configFilePath)
@@ -215,12 +230,17 @@ func main() {
 		return
 	}
 
+	output := OutputData{
+		Organization: config.Org,
+		Repositories: make(map[string]map[string]EnvData),
+	}
 	// Display organization name
 	fmt.Printf("Organization: %s\n\n", config.Org)
 
 	// Iterate over repos and fetch deployments
 	for repo, environments := range config.Repos {
 		fmt.Printf("Fetching deployments for repo: %s/%s\n", config.Org, repo)
+		repoData := make(map[string]EnvData)
 
 		deployments, err := fetchDeployments(config.Org, repo)
 		if err != nil {
@@ -240,7 +260,12 @@ func main() {
 				}
 			}
 
+			envData := EnvData{}
 			if latestDeployment != nil {
+				// mapping envData values
+				envData.DeploymentID = latestDeployment.ID
+				envData.Ref = latestDeployment.Ref
+
 				fmt.Printf("  - Deployment ID: %d\n", latestDeployment.ID)
 				fmt.Printf("  - Ref: %s\n", latestDeployment.Ref)
 
@@ -252,19 +277,37 @@ func main() {
 					fmt.Printf("  - Status: %s\n", status.State)
 					fmt.Printf("  - Created At: %s\n", latestDeployment.CreatedAt)
 					fmt.Printf("  - Status Created At: %s\n", status.CreatedAt)
+					envData.Status = status.State
+					envData.StatusTime = status.CreatedAt
 				} else {
 					fmt.Printf("  - Created At: %s\n", latestDeployment.CreatedAt)
 					fmt.Printf("  - No statuses found for this deployment\n")
+					envData.CreatedAt = latestDeployment.CreatedAt
 				}
 				if latestDeployment.Description == "" {
 					fmt.Println("  - Description: NOT_SET")
+					envData.Description = "NOT_SET"
 				} else {
 					fmt.Printf("  - Description: %s\n", latestDeployment.Description)
+					envData.Description = latestDeployment.Description
 				}
 			} else {
 				fmt.Printf("  - No deployments found for this environment\n")
 			}
+			repoData[env] = envData
 		}
 		fmt.Println()
+
+		output.Repositories[repo] = repoData
+	}
+	yamlOutput, err := yaml.Marshal(&output)
+	if err != nil {
+		fmt.Printf("Error marshalling output to YAML: %v\n", err)
+		return
+	}
+
+	if err := os.WriteFile(outputFilePath, yamlOutput, 0644); err != nil {
+		fmt.Printf("Error writing to file %s: %v\n", outputFilePath, err)
+		return
 	}
 }
