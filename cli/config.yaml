@@ -5,3 +5,8 @@ repos:
     - test
     - uat
     - prod
+  AutomationTestRepo:
+    - dev
+    - test
+    - uat
+    - prod
