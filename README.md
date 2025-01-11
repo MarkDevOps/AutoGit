@@ -25,6 +25,7 @@ Another attempt at a Github automation script
 ### NOTES 
 To build and run
 `go build -o ./bin/autogit && ./bin/autogit fetch config.yaml`
+
 To just run 
 `go run main.go fetch config.yaml`
 
