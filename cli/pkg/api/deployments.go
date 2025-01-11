@@ -11,7 +11,17 @@ import (
 
 func FetchDeployments(org, repo string) ([]types.Deployment, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/deployments", org, repo)
-	resp, err := http.Get(url)
+
+	// Create a new request using http.NewRequest() and set the Authorization header
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch deployments: %w", err)
+	}
+	// Set the Authorization header using req.Header.Set()
+	req.Header.Set("Authorization", "bearer "+setHeader())
+
+	// Send the request using http.DefaultClient.Do() and check the response
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch deployments: %w", err)
 	}

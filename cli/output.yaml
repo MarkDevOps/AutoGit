@@ -17,3 +17,8 @@ repositories:
             ref: main
             created_at: "2024-12-10T22:12:52Z"
             deployment_url: https://api.github.com/repos/MarkDevOps/AutoGit/deployments/2029558020/statuses
+    automationtestrepo:
+        dev: {}
+        prod: {}
+        test: {}
+        uat: {}

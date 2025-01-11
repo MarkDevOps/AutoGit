@@ -35,7 +35,17 @@ type WorkflowRun struct {
 // FetchWorkflows retrieves all workflows for a given repository.
 func FetchWorkflows(org, repo string) ([]Workflow, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/actions/workflows", org, repo)
-	resp, err := http.Get(url)
+
+	// Create a new request using http.NewRequest() and set the Authorization header
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch workflows: %w", err)
+	}
+	// Set the Authorization header using req.Header.Set()
+	req.Header.Add("Authorization", "bearer "+setHeader())
+
+	// Send the request using http.DefaultClient.Do() and check the response
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch workflows: %w", err)
 	}
