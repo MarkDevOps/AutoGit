@@ -18,7 +18,19 @@ repositories:
             created_at: "2024-12-10T22:12:52Z"
             deployment_url: https://api.github.com/repos/MarkDevOps/AutoGit/deployments/2029558020/statuses
     automationtestrepo:
-        dev: {}
+        dev:
+            deployment_id: 2104318477
+            ref: main
+            created_at: "2025-01-12T21:27:57Z"
+            deployment_url: https://api.github.com/repos/MarkDevOps/AutomationTestRepo/deployments/2104318477/statuses
         prod: {}
-        test: {}
-        uat: {}
+        test:
+            deployment_id: 2104321132
+            ref: v0.0.0-alpha-3
+            created_at: "2025-01-12T21:30:45Z"
+            deployment_url: https://api.github.com/repos/MarkDevOps/AutomationTestRepo/deployments/2104321132/statuses
+        uat:
+            deployment_id: 2104321236
+            ref: v0.0.0-alpha-3
+            created_at: "2025-01-12T21:30:52Z"
+            deployment_url: https://api.github.com/repos/MarkDevOps/AutomationTestRepo/deployments/2104321236/statuses
