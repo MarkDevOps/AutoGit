@@ -1,12 +1,10 @@
 org: MarkDevOps
 repos:
   AutoGit:
-    - dev
-    - test
-    - uat
-    - prod
-  AutomationTestRepo:
-    - dev
-    - test
-    - uat
-    - prod
+    dev:
+      - Name: Secret1"
+        Value: "Another secret"
+      - Name: Secret2"
+        Value: "Another one"
+    test:
+      Secret1: "Test secret"
