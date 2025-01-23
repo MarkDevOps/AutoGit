@@ -22,6 +22,7 @@ var fetchCmd = &cobra.Command{
 	Long:  "Fetch deployment, release, and workflow data from GitHub repositories specified in the configuration file.",
 	Run: func(cmd *cobra.Command, args []string) {
 		var config types.Config
+
 		if err := viper.Unmarshal(&config); err != nil {
 			fmt.Printf("Error parsing config: %v\n", err)
 			return
@@ -33,7 +34,6 @@ var fetchCmd = &cobra.Command{
 		}
 
 		fmt.Printf("Organization: %s\n\n", config.Org)
-
 		for repo, environments := range config.Repos {
 			fmt.Printf("Fetching deployments for repo: %s/%s\n", config.Org, repo)
 			repoData := make(map[string]types.EnvData)
@@ -44,14 +44,17 @@ var fetchCmd = &cobra.Command{
 				continue
 			}
 
-			for _, env := range environments {
-				envData := api.MapEnvironmentData(deployments, env)
-				repoData[env] = envData
+			for envName, envOptions := range environments {
+				if envOptions.FetchReleases {
+					fmt.Printf("  Processing environment: %s\n", envName)
+					envData := api.MapEnvironmentData(deployments, envName, envOptions)
+					repoData[envName] = envData
+				} else {
+					fmt.Printf("  Skipping '%s' (fetchRelease is false\n", envName)
+				}
 			}
-
 			output.Repositories[repo] = repoData
 		}
-
 		if err := api.WriteOutput(output, outputFile); err != nil {
 			fmt.Printf("Error writing output: %v\n", err)
 		}

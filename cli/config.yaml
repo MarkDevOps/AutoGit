@@ -2,9 +2,58 @@ org: MarkDevOps
 repos:
   AutoGit:
     dev:
-      - Name: Secret1"
-        Value: "Another secret"
-      - Name: Secret2"
-        Value: "Another one"
+      createDeploymentEnv: true # Ceates the deployment environments 
+      fetchReleases: true # Fetches the latest release information on the environment
+      createVariables: false # Create Variables within the repo and deployment environment
+      variables:
+        var1: "Another Variable"
+        Var2: "Another one"
+      createSecrets: false # Create Secrets within the repo and deployment environment
+      secrets:
+        Secret1: "Another Variable"
+        Secret2: "Another one"
     test:
-      Secret1: "Test secret"
+      createDeploymentEnv: false
+      fetchReleases: false    
+      createVariables: false
+      variables:
+        var1: "Another Variable"
+        Var2: "Another one"
+      createSecrets: false
+      secrets:
+        Secret1: "Another Variable"
+        Secret2: "Another one"
+    env1:
+      createDeploymentEnv: true # Ceates the deployment environments 
+      fetchReleases: false # Fetches the latest release information on the environment
+      createVariables: false # Create Variables within the repo and deployment environment
+      variables:
+        var1: "Another Variable"
+        Var2: "Another one"
+      createSecrets: false # Create Secrets within the repo and deployment environment
+      secrets:
+        Secret1: "Another Variable"
+        Secret2: "Another one"
+    env2:
+      createDeploymentEnv: true
+      fetchReleases: false    
+      createVariables: false
+      variables:
+        var1: "Another Variable"
+        Var2: "Another one"
+      createSecrets: false
+      secrets:
+        Secret1: "Another Variable"
+        Secret2: "Another one"
+# org: MarkDevOps
+# repos:
+#   AutoGit:
+#     - dev
+#     - test
+#     - uat
+#     - prod
+#   AutomationTestRepo:
+#     - dev
+#     - test
+#     - uat
+#     - prod

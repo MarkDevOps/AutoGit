@@ -6,8 +6,21 @@ import (
 
 // Used for the fetch Command
 type Config struct {
-	Org   string              `yaml:"org"`
-	Repos map[string][]string `yaml:"repos"`
+	Org   string                                     `yaml:"org"`
+	Repos map[string]map[string]DeploymentEnvOptions `yaml:"repos"`
+	// Repos map[string][]string `yaml:"repos"`
+}
+type DeploymentEnvOptions struct {
+	CreateDeploymentEnv bool              `yaml:"createDeploymentEnv,omitempty"`
+	CreateVariables     bool              `yaml:"createVariables,omitempty"`
+	Variables           map[string]string `yaml:"variables,omitempty"`
+	CreateSecrets       bool              `yaml:"createSecrets,omitempty"`
+	Secrets             map[string]string `yaml:"secrets,omitempty"`
+	FetchReleases       bool              `yaml:"fetchReleases,omitempty"`
+}
+
+type EnvCheck struct {
+	Title string `json:"title"`
 }
 
 // Used for outputs
