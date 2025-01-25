@@ -30,7 +30,7 @@ var createCmd = &cobra.Command{
 		// Get the type flag
 		typeFlag, _ := cmd.Flags().GetString("type")
 		if typeFlag == "" {
-			fmt.Println("Error: --type flag is required. Options: deployment-env, Repository, Secret, Variable")
+			fmt.Println("Error: --type flag is required. Options: deployment-env, Repository, Secrets, Variables, Secrets-Variables")
 			return
 		}
 
@@ -48,6 +48,29 @@ var createCmd = &cobra.Command{
 						}
 					} else {
 						fmt.Printf("\nSkipping environment %s in repository %s as 'createDeploymentEnv' is false\n", envName, repoName)
+					}
+				}
+			}
+		case "secrets":
+			for repoName, environments := range config.Repos {
+				fmt.Printf("\nRepository: %s\n", repoName)
+				for envName, envOptions := range environments {
+					if envOptions.CreateSecrets {
+						fmt.Printf("\nAttempting to fetch environment public-key for %s/%s/%s\n", config.Org, repoName, envName)
+						if publicKey, err := api.GetGithubPublicKey(config.Org, repoName, envName); err != nil {
+							fmt.Printf("Error fetching public key for %s/%s/%s: %v\n", config.Org, repoName, envName, err)
+						} else {
+							fmt.Printf("Successfully fetched public key for %s/%s/%s\n", config.Org, repoName, envName)
+							fmt.Printf("\nPublic-key for %s/%s/%s: %s\n", config.Org, repoName, envName, publicKey.(map[string]interface{})["key"].(string)) // Display the public key in terminal (Debug reasons only.)
+							for secretName, secretValue := range envOptions.Secrets {
+								fmt.Printf("\nAttempting to create/update secret '%s':'%s' within %s/%s/%s\n", secretName, secretValue, config.Org, repoName, envName)
+								if err := api.CreateUpdateSecret(config.Org, repoName, envName, secretName, secretValue, publicKey.(map[string]interface{})["key"].(string), publicKey.(map[string]interface{})["key_id"].(string)); err != nil {
+									fmt.Printf("Error creating/updating secret %s within %s/%s/%s: %v\n", secretName, config.Org, repoName, envName, err)
+								} else {
+									fmt.Printf("Successfully created/updated secret %s within %s/%s/%s\n", secretName, config.Org, repoName, envName)
+								}
+							}
+						}
 					}
 				}
 			}
