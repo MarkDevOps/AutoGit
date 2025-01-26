@@ -8,6 +8,7 @@ repos:
       variables:
         var1: "Another Variable"
         Var2: "Another-one"
+        What: "abhs"
       createSecrets: true # Create Secrets within the repo and deployment environment
       secrets:
         secret1: Another-Variable

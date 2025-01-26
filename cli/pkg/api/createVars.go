@@ -72,12 +72,12 @@ func PatchVariable(org, repo, env, variable, value string) error {
 
 }
 
-func CreateUpdateVariable(org, repo, env, variable, value string) error {
+func CreateUpdateVariable(org, repo, env, variable, value string) (string, error) {
 	uri := fmt.Sprintf("https://api.github.com/repos/%s/%s/environments/%s/variables", org, repo, env)
 	// Create a new request using http.NewRequest() and set the Authorization header
 	req, err := http.NewRequest("POST", uri, nil)
 	if err != nil {
-		return fmt.Errorf("failed to send POST to variables Api: %w", err)
+		return "error", fmt.Errorf("failed to send POST to variables Api: %w", err)
 	}
 
 	// Set the Authorization header using req.Header.Add()
@@ -94,12 +94,14 @@ func CreateUpdateVariable(org, repo, env, variable, value string) error {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to send request to variables API: %w", err)
+		return "error", fmt.Errorf("failed to send request to variables API: %w", err)
 	}
 	defer resp.Body.Close()
 
+	status := "created"
+
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusConflict {
-		return fmt.Errorf("failed to create variable: %s", resp.Status)
+		return "error", fmt.Errorf("failed to create variable: %s", resp.Status)
 	}
 	if resp.StatusCode == http.StatusConflict {
 
@@ -108,20 +110,20 @@ func CreateUpdateVariable(org, repo, env, variable, value string) error {
 		existingVariable, err := ShowVariables(org, repo, env, variable)
 		fmt.Printf("\nexisting variable: '%s': '%v'\n", variable, existingVariable.(map[string]interface{})["value"].(string))
 		if err != nil {
-			return fmt.Errorf("failed to show existing variable: %w", err)
+			return "error", fmt.Errorf("failed to show existing variable: %w", err)
 		}
 		if existingVariable.(map[string]interface{})["value"].(string) == value {
 			fmt.Printf("variable already exists with same value: %s\n\n", variable)
-			return nil
+			status = "Unchanged"
 		} else {
 			fmt.Printf("\nvariable already exists with different value: %s\n", variable)
 			fmt.Println("updating variable")
+			status = "changed"
 			if err := PatchVariable(org, repo, env, variable, value); err != nil {
-				return fmt.Errorf("failed to patch variable: %w", err)
+				return "error", fmt.Errorf("failed to patch variable: %w", err)
 			}
 		}
 	}
-
-	fmt.Printf("\nCreating variable for %s in %s\n", variable, repo)
-	return nil
+	fmt.Printf("Creating variable for `%s` in %s/%s/%s\n", variable, org, repo, env)
+	return status, nil
 }

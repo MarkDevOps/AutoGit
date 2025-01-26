@@ -34,6 +34,9 @@ var createCmd = &cobra.Command{
 			return
 		}
 
+		// Define summary map
+		summary := make(map[string]string)
+
 		switch typeFlag {
 		case "deployment-env":
 			for repoName, environments := range config.Repos {
@@ -84,8 +87,12 @@ var createCmd = &cobra.Command{
 						for variableName, variableValue := range envOptions.Variables {
 							fmt.Println("---------------------------------------------------------------------")
 							fmt.Printf("\nAttempting to create/update variable '%s':'%s' within %s/%s/%s\n", variableName, variableValue, config.Org, repoName, envName)
-							if err := api.CreateUpdateVariable(config.Org, repoName, envName, variableName, variableValue); err != nil {
+							status, err := api.CreateUpdateVariable(config.Org, repoName, envName, variableName, variableValue)
+							if err != nil {
 								fmt.Printf("Error creating/updating variable %s within %s/%s/%s: %s\n", variableName, config.Org, repoName, envName, err)
+								summary[fmt.Sprintf("variable %s in %s/%s", variableName, repoName, envName)] = "error"
+							} else {
+								summary[fmt.Sprintf("variable %s in %s/%s", variableName, repoName, envName)] = status
 							}
 						}
 					}
@@ -96,11 +103,25 @@ var createCmd = &cobra.Command{
 		default:
 			fmt.Printf("Error: Unsupported --type value '%s'. Options: deployment-env, Repository, secrets, variables, secrets-variables\n", typeFlag)
 		}
+		// Print summary
+		fmt.Print("|-------------------------|")
+		fmt.Println("\n| Summary of changes: 	  |")
+		fmt.Println("|-------------------------|")
+		for item, status := range summary {
+			if status == "error" {
+				fmt.Printf("%s: %s ❌\n", item, status)
+			} else if status == "Unchanged" {
+				fmt.Printf("%s: %s ⚓\n", item, status)
+			} else if status == "updated" {
+				fmt.Printf("%s: %s ✒️\n", item, status)
+			} else if status == "created" {
+				fmt.Printf("%s: %s ✅\n", item, status)
+			}
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(createCmd)
 	createCmd.Flags().StringP("type", "t", "", "Type of resource to create. Options repository, secret, variable")
-
 }
