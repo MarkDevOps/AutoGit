@@ -17,7 +17,7 @@ func ShowVariables(org, repo, env, variable string) (interface{}, error) {
 	}
 
 	// Set the Authorization header using req.Header.Add()
-	req.Header.Add("Authorization", "bearer "+setHeader())
+	req.Header.Add("Authorization", "bearer "+SetHeader())
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -48,7 +48,7 @@ func PatchVariable(org, repo, env, variable, value string) error {
 	}
 
 	// set the Authorization header using req.Header.Add()
-	req.Header.Add("Authorization", "bearer "+setHeader())
+	req.Header.Add("Authorization", "bearer "+SetHeader())
 	req.Body = io.NopCloser(
 		strings.NewReader(fmt.Sprintf(`
 			{
@@ -83,7 +83,7 @@ func CreateUpdateVariable(org, repo, env, variable, value string) (string, error
 	}
 
 	// Set the Authorization header using req.Header.Add()
-	req.Header.Add("Authorization", "bearer "+setHeader())
+	req.Header.Add("Authorization", "bearer "+SetHeader())
 	req.Header.Add("Accept", "application/vnd.github+json")
 	req.Header.Add("X-GitHub-Api-version", "2022-11-28")
 	req.Body = io.NopCloser(strings.NewReader(fmt.Sprintf(`

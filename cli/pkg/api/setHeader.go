@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func setHeader() string {
+func SetHeader() string {
 	// checking GITHUB_TOKEN environment variable exists
 	GITHUB_TOKEN := os.Getenv("GITHUB_TOKEN")
 	if GITHUB_TOKEN == "" {

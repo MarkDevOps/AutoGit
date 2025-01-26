@@ -20,7 +20,7 @@ func GetGithubPublicKey(org, repo, env string) (interface{}, error) {
 		return nil, fmt.Errorf("failed to get public key: %w", err)
 	}
 	// Set the Authorization header using req.Header.Set()
-	req.Header.Add("Authorization", "bearer "+setHeader())
+	req.Header.Add("Authorization", "bearer "+SetHeader())
 	// Send the request using http.DefaultClient.Do() and check the response
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -95,7 +95,7 @@ func CreateUpdateSecret(org, repo, env, secret, value, publickey, publickey_id s
 		return "error:", fmt.Errorf("failed to sent PUT API request for create/update secrets: %w", err)
 	}
 	// Set the Authorization header using req.Header.Set()
-	req.Header.Add("Authorization", "bearer "+setHeader())
+	req.Header.Add("Authorization", "bearer "+SetHeader())
 	req.Header.Add("Accept", "application/vnd.github+json")
 	req.Header.Add("X-GitHub-Api-version", "2022-11-28")
 	req.Body = io.NopCloser(

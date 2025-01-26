@@ -18,7 +18,7 @@ func FetchDeployments(org, repo string) ([]types.Deployment, error) {
 		return nil, fmt.Errorf("failed to fetch deployments: %w", err)
 	}
 	// Set the Authorization header using req.Header.Set()
-	req.Header.Set("Authorization", "bearer "+setHeader())
+	req.Header.Set("Authorization", "bearer "+SetHeader())
 
 	// Send the request using http.DefaultClient.Do() and check the response
 	resp, err := http.DefaultClient.Do(req)

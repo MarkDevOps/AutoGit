@@ -19,7 +19,7 @@ func CreateDeploymentEnv(org, repo, env string, envOptions types.DeploymentEnvOp
 		return "error:", fmt.Errorf("failed to create deployment environment: %w", err)
 	}
 
-	req.Header.Add("Authorization", "bearer "+setHeader())
+	req.Header.Add("Authorization", "bearer "+SetHeader())
 	// req.Body = io.NopCloser(
 	// 	strings.NewReader(fmt.Sprintln(`{
 	// 			"prevent_self_review": false,
@@ -57,7 +57,7 @@ func CheckDeployEnv(org, repo, env string, envOptions types.DeploymentEnvOptions
 		return nil, fmt.Errorf("failed to create deployment environment: %w", err)
 	}
 
-	req.Header.Add("Authorization", "bearer "+setHeader())
+	req.Header.Add("Authorization", "bearer "+SetHeader())
 	// Send the request using http.DefaultClient.Do() and check the response
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
