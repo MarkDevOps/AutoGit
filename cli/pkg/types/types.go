@@ -1,12 +1,29 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
+// Used for the fetch Command
 type Config struct {
-	Org   string              `yaml:"org"`
-	Repos map[string][]string `yaml:"repos"`
+	Org   string                                     `yaml:"org"`
+	Repos map[string]map[string]DeploymentEnvOptions `yaml:"repos"`
+	// Repos map[string][]string `yaml:"repos"`
+}
+type DeploymentEnvOptions struct {
+	CreateDeploymentEnv bool              `yaml:"createDeploymentEnv,omitempty"`
+	CreateVariables     bool              `yaml:"createVariables,omitempty"`
+	Variables           map[string]string `yaml:"variables,omitempty"`
+	CreateSecrets       bool              `yaml:"createSecrets,omitempty"`
+	Secrets             map[string]string `yaml:"secrets,omitempty"`
+	FetchReleases       bool              `yaml:"fetchReleases,omitempty"`
 }
 
+type EnvCheck struct {
+	Title string `json:"title"`
+}
+
+// Used for outputs
 type OutputData struct {
 	Organization string                        `yaml:"organization"`
 	Repositories map[string]map[string]EnvData `yaml:"repositories"`
@@ -44,4 +61,16 @@ type Deployment struct {
 	StatusesURL string    `json:"statuses_url"`
 	Timestamp   int64     `json:"timestamp"`
 	Environment string    `json:"environment"`
+}
+
+// Used for the secrets Command
+type ConfigSecrets struct {
+	Org   string                        `yaml:"org"`
+	Repos map[string]map[string]Secrets `yaml:"repos"`
+}
+
+// Used for the secrets Command
+type Secrets struct {
+	Name  string `yaml:"name"`
+	Value string `yaml:"value"`
 }

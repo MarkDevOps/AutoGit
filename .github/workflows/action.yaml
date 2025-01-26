@@ -1,7 +1,8 @@
-name: Action workflow
-run-name: Action - ${{ inputs.environment }}
+name: TestFetchReleaseAction
+run-name: TestFetchReleaseAction - ${{ inputs.environment }}
 
 on:
+
   workflow_dispatch:
     inputs:
       environment:

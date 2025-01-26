@@ -1,7 +1,0 @@
-org: MarkDevOps
-repos:
-  AutoGit:
-    - dev
-    - test
-    - uat
-    - prod

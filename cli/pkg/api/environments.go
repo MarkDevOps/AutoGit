@@ -14,10 +14,10 @@ import (
 // 	return i
 // }
 
-func MapEnvironmentData(deployments []types.Deployment, env string) types.EnvData {
+func MapEnvironmentData(deployments []types.Deployment, envName string, envOptions types.DeploymentEnvOptions) types.EnvData {
 	var latestDeployment *types.Deployment
 	for _, dep := range deployments {
-		if dep.Environment == env {
+		if dep.Environment == envName {
 			if latestDeployment == nil || dep.Timestamp > latestDeployment.Timestamp {
 				latestDeployment = &dep
 			}

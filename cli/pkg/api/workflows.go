@@ -42,7 +42,7 @@ func FetchWorkflows(org, repo string) ([]Workflow, error) {
 		return nil, fmt.Errorf("failed to fetch workflows: %w", err)
 	}
 	// Set the Authorization header using req.Header.Set()
-	req.Header.Add("Authorization", "bearer "+setHeader())
+	req.Header.Add("Authorization", "bearer "+SetHeader())
 
 	// Send the request using http.DefaultClient.Do() and check the response
 	resp, err := http.DefaultClient.Do(req)
