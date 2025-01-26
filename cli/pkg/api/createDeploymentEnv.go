@@ -9,12 +9,14 @@ import (
 	"github.com/MarkDevOps/AutoGit/cli/pkg/types"
 )
 
-func CreateDeploymentEnv(org, repo, env string, envOptions types.DeploymentEnvOptions) error {
+func CreateDeploymentEnv(org, repo, env string, envOptions types.DeploymentEnvOptions) (string, error) {
+	var status string
 	uri := fmt.Sprintf("https://api.github.com/repos/%s/%s/environments/%s", org, repo, env)
 	// Create a new request using http.NewRequest() and set the Authorization header
 	req, err := http.NewRequest("PUT", uri, nil)
 	if err != nil {
-		return fmt.Errorf("failed to create deployment environment: %w", err)
+		status = "error"
+		return "error:", fmt.Errorf("failed to create deployment environment: %w", err)
 	}
 
 	req.Header.Add("Authorization", "bearer "+setHeader())
@@ -32,17 +34,20 @@ func CreateDeploymentEnv(org, repo, env string, envOptions types.DeploymentEnvOp
 	// Send the request using http.DefaultClient.Do() and check the response
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to send PUT request to environment API: %w", err)
+		status = "error"
+		return "error:", fmt.Errorf("failed to send PUT request to environment API: %w", err)
 	}
 	defer resp.Body.Close()
+	status = "Created&Updated"
 
 	if resp.StatusCode != http.StatusOK {
+		status = "error"
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("failed to create environment: %s", body)
+		return "error:", fmt.Errorf("failed to create environment: %s", body)
 	}
 
 	fmt.Printf("Creating deployment environment for %s in %s\n", env, repo)
-	return nil
+	return status, nil
 }
 
 func CheckDeployEnv(org, repo, env string, envOptions types.DeploymentEnvOptions) ([]types.EnvCheck, error) {

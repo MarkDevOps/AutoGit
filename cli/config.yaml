@@ -3,20 +3,21 @@ repos:
   AutoGit:
     dev:
       createDeploymentEnv: true # Ceates the deployment environments 
-      fetchReleases: true # Fetches the latest release information on the environment
+      fetchReleases: false # Fetches the latest release information on the environment -- Not included in ALL command
       createVariables: true # Create Variables within the repo and deployment environment
       variables:
         var1: "Another Variable"
         Var2: "Another-one"
-        What: "abhs"
+        What: "asdd"
+        lolaaa: "new"
       createSecrets: true # Create Secrets within the repo and deployment environment
       secrets:
         secret1: Another-Variable
         secret2: Another-one
     test:
-      createDeploymentEnv: false
+      createDeploymentEnv: true
       fetchReleases: false    
-      createVariables: false
+      createVariables: true
       variables:
         var1: "Another Variable"
         Var2: "Another one"
@@ -27,7 +28,7 @@ repos:
     env1:
       createDeploymentEnv: true # Ceates the deployment environments 
       fetchReleases: false # Fetches the latest release information on the environment
-      createVariables: false # Create Variables within the repo and deployment environment
+      createVariables: true # Create Variables within the repo and deployment environment
       variables:
         var1: "Another Variable"
         Var2: "Another one"
@@ -42,19 +43,32 @@ repos:
       variables:
         var1: "Another Variable"
         Var2: "Another one"
+      createSecrets: false
+      secrets:
+        Secret1: "Another Variable"
+        Secret2: "Another one"
+  AutomationTestRepo:
+    Dev:
+      createDeploymentEnv: true # Ceates the deployment environments 
+      fetchReleases: false # Fetches the latest release information on the environment -- Not included in ALL command
+      createVariables: true # Create Variables within the repo and deployment environment
+      variables:
+        var1: "Another Variable"
+        Var2: "Another-one"
+        What: "asdd"
+        lolaaa: "new"
+      createSecrets: true # Create Secrets within the repo and deployment environment
+      secrets:
+        secret1: Another-Variable
+        secret2: Another-one
+    Test:
+      createDeploymentEnv: true
+      fetchReleases: false    
+      createVariables: true
+      variables:
+        var1: "Another Variable"
+        Var2: "Another one"
       createSecrets: true
       secrets:
         Secret1: "Another Variable"
         Secret2: "Another one"
-# org: MarkDevOps
-# repos:
-#   AutoGit:
-#     - dev
-#     - test
-#     - uat
-#     - prod
-#   AutomationTestRepo:
-#     - dev
-#     - test
-#     - uat
-#     - prod

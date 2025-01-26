@@ -73,10 +73,12 @@ func PatchVariable(org, repo, env, variable, value string) error {
 }
 
 func CreateUpdateVariable(org, repo, env, variable, value string) (string, error) {
+	var status string
 	uri := fmt.Sprintf("https://api.github.com/repos/%s/%s/environments/%s/variables", org, repo, env)
 	// Create a new request using http.NewRequest() and set the Authorization header
 	req, err := http.NewRequest("POST", uri, nil)
 	if err != nil {
+		status = "error"
 		return "error", fmt.Errorf("failed to send POST to variables Api: %w", err)
 	}
 
@@ -94,13 +96,15 @@ func CreateUpdateVariable(org, repo, env, variable, value string) (string, error
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
+		status = "error"
 		return "error", fmt.Errorf("failed to send request to variables API: %w", err)
 	}
 	defer resp.Body.Close()
 
-	status := "created"
+	status = "Created"
 
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusConflict {
+		status = "error"
 		return "error", fmt.Errorf("failed to create variable: %s", resp.Status)
 	}
 	if resp.StatusCode == http.StatusConflict {
@@ -110,6 +114,7 @@ func CreateUpdateVariable(org, repo, env, variable, value string) (string, error
 		existingVariable, err := ShowVariables(org, repo, env, variable)
 		fmt.Printf("\nexisting variable: '%s': '%v'\n", variable, existingVariable.(map[string]interface{})["value"].(string))
 		if err != nil {
+			status = "error"
 			return "error", fmt.Errorf("failed to show existing variable: %w", err)
 		}
 		if existingVariable.(map[string]interface{})["value"].(string) == value {
@@ -118,7 +123,7 @@ func CreateUpdateVariable(org, repo, env, variable, value string) (string, error
 		} else {
 			fmt.Printf("\nvariable already exists with different value: %s\n", variable)
 			fmt.Println("updating variable")
-			status = "changed"
+			status = "Changed"
 			if err := PatchVariable(org, repo, env, variable, value); err != nil {
 				return "error", fmt.Errorf("failed to patch variable: %w", err)
 			}

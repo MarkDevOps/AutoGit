@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -30,7 +29,7 @@ func GetGithubPublicKey(org, repo, env string) (interface{}, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("failed to get public key: %s", body)
 	}
 
@@ -80,18 +79,20 @@ func EncryptValue(publicKey, value string) (string, error) {
 	return base64.StdEncoding.EncodeToString(encrypted), nil
 }
 
-func CreateUpdateSecret(org, repo, env, secret, value, publickey, publickey_id string) error {
+func CreateUpdateSecret(org, repo, env, secret, value, publickey, publickey_id string) (string, error) {
+
+	var status string
 
 	encryptedValue, err := EncryptValue(publickey, value)
 	if err != nil {
-		return fmt.Errorf("failed to encrypt value: %w", err)
+		return "error:", fmt.Errorf("failed to encrypt value: %w", err)
 	}
 
 	uri := fmt.Sprintf("https://api.github.com/repos/%s/%s/environments/%s/secrets/%s", org, repo, env, secret)
 	// Create a new request using http.NewRequest() and set the Authorization header
 	req, err := http.NewRequest("PUT", uri, nil)
 	if err != nil {
-		return fmt.Errorf("failed to sent PUT API request for create/update secrets: %w", err)
+		return "error:", fmt.Errorf("failed to sent PUT API request for create/update secrets: %w", err)
 	}
 	// Set the Authorization header using req.Header.Set()
 	req.Header.Add("Authorization", "bearer "+setHeader())
@@ -109,15 +110,23 @@ func CreateUpdateSecret(org, repo, env, secret, value, publickey, publickey_id s
 	// Send the request using http.DefaultClient.Do() and check the response
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("failed to send request to secret API: %w", err)
+		return "error:", fmt.Errorf("failed to send request to secret API: %w", err)
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusCreated {
+		status = "Created"
+	}
+	if resp.StatusCode == http.StatusNoContent {
+		status = "Changed"
+	}
+
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("failed to create secret '%s': %s", secret, body)
+		status = "error"
+		return "error:", fmt.Errorf("failed to create secret '%s': %s", secret, body)
 	}
 
 	fmt.Printf("Creating secret for %s in %s\n", secret, repo)
-	return nil
+	return status, nil
 }
