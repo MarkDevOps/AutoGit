@@ -30,7 +30,7 @@ var createCmd = &cobra.Command{
 		// Get the type flag
 		typeFlag, _ := cmd.Flags().GetString("type")
 		if typeFlag == "" {
-			fmt.Println("Error: --type flag is required. Options: deployment-env, Repository, Secrets, Variables, Secrets-Variables")
+			fmt.Println("Error: --type flag is required. Options: deployment-env, Repository, secrets, variables, secrets-variables")
 			return
 		}
 
@@ -74,8 +74,27 @@ var createCmd = &cobra.Command{
 					}
 				}
 			}
+		case "variables":
+			for repoName, environments := range config.Repos {
+				fmt.Printf("\n  Repository: %s\n", repoName)
+				fmt.Println("|-----------------------------|")
+				for envName, envOptions := range environments {
+					if envOptions.CreateVariables {
+						fmt.Printf("\n  Attempting to create/update variables within %s/%s/%s\n\n", config.Org, repoName, envName)
+						for variableName, variableValue := range envOptions.Variables {
+							fmt.Println("---------------------------------------------------------------------")
+							fmt.Printf("\nAttempting to create/update variable '%s':'%s' within %s/%s/%s\n", variableName, variableValue, config.Org, repoName, envName)
+							if err := api.CreateUpdateVariable(config.Org, repoName, envName, variableName, variableValue); err != nil {
+								fmt.Printf("Error creating/updating variable %s within %s/%s/%s: %s\n", variableName, config.Org, repoName, envName, err)
+							}
+						}
+					}
+				}
+			}
+		case "secrets-variables":
+
 		default:
-			fmt.Printf("Error: Unsupported --type value '%s'. Options: DeploymentEnv, Repository, Secret, Variable\n", typeFlag)
+			fmt.Printf("Error: Unsupported --type value '%s'. Options: deployment-env, Repository, secrets, variables, secrets-variables\n", typeFlag)
 		}
 	},
 }

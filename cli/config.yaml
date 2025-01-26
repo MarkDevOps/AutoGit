@@ -4,10 +4,10 @@ repos:
     dev:
       createDeploymentEnv: true # Ceates the deployment environments 
       fetchReleases: true # Fetches the latest release information on the environment
-      createVariables: false # Create Variables within the repo and deployment environment
+      createVariables: true # Create Variables within the repo and deployment environment
       variables:
         var1: "Another Variable"
-        Var2: "Another one"
+        Var2: "Another-one"
       createSecrets: true # Create Secrets within the repo and deployment environment
       secrets:
         secret1: Another-Variable
