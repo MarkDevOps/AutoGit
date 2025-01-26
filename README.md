@@ -48,26 +48,26 @@ The configuration file (`config.yaml`) should be structured as follows:
 ```YAML
 org: ORG-NAME
 repos:
-	Repo1:
-		Dev:
-			createDeploymentEnv: true # Ceates the deployment environments 
-			fetchReleases: false # Fetches the latest release information on the environment -- Not included in ALL command
-			createVariables: true # Create Variables within the repo and deployment environment
-			createSecrets: true # Create Secrets within the repo and deployment environment
-			variables:
-					var1: "I AM A VARIABLE"
-			secrets:
-					secret1: "I AM A SECRET"
-	Repo2:
-		Dev:
-			createDeploymentEnv: true # Ceates the deployment environments 
-			fetchReleases: false # Fetches the latest release information on the environment -- Not included in ALL command
-			createVariables: true # Create Variables within the repo and deployment environment
-			createSecrets: true # Create Secrets within the repo and deployment environment
-			variables:
-				var1: "I AM A VARIABLE"
-			secrets:
-				secret1: "I AM A SECRET"
+  Repo1:
+    Dev:
+      createDeploymentEnv: true # Ceates the deployment environments 
+      fetchReleases: false # Fetches the latest release information on the environment -- Not included in ALL command
+      createVariables: true # Create Variables within the repo and deployment environment
+      createSecrets: true # Create Secrets within the repo and deployment environment
+      variables:
+        var1: "I AM A VARIABLE"
+      secrets:
+        secret1: "I AM A SECRET"
+  Repo2:
+    Dev:
+      createDeploymentEnv: true # Ceates the deployment environments 
+      fetchReleases: false # Fetches the latest release information on the environment -- Not included in ALL command
+      createVariables: true # Create Variables within the repo and deployment environment
+      createSecrets: true # Create Secrets within the repo and deployment environment
+      variables:
+        var1: "I AM A VARIABLE"
+      secrets:
+        secret1: "I AM A SECRET"
 ```
 
 
